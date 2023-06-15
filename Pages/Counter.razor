@@ -1,0 +1,56 @@
+﻿@page "/counter"
+
+ 
+@inject IJSRuntime jsRuntime;
+<h1>Out of memory test.</h1>
+<p role="status">Buffer collection count: @_collectionCount</p>
+<button class="btn btn-primary" @onclick="CreateBuffer">Create Buffer</button>
+<button class="btn btn-primary" @onclick="CreateBufferFromJs">Create Buffer From Js</button>
+<button class="btn btn-primary" @onclick="DestroyBuffer">Destroy Buffer</button>
+@code {
+    private int _collectionCount = 0;
+    private record BufferHolder(byte[] Buffer);
+    private List<BufferHolder> _bufferHolders = new List<BufferHolder>();
+    private int _bufferLength = 5 * 1024 * 1024;
+    private int _iterations = 10;
+   
+    private async Task CreateBuffer()
+    {
+        for (int i = 0; i < _iterations; i++)
+        {
+            byte[] digits = GetBytes();
+            _bufferHolders.Add(new BufferHolder(digits));
+        }
+        _collectionCount = _bufferHolders.Count;
+        await jsRuntime.InvokeVoidAsync("alert", "Buffer created.");
+    }
+    private byte[] GetBytes()
+    {
+        byte[] digits = new byte[_bufferLength];
+        for (int i = 0; i < _bufferLength; i++)
+        {
+            digits[i] = (byte)i;
+        }
+        return digits;
+    }
+    private async Task DestroyBuffer()
+    {
+        for (int i = 0; i < _bufferHolders.Count; i++)
+        {
+            _bufferHolders[i] = null;
+        }
+        _bufferHolders.Clear();
+        _collectionCount = _bufferHolders.Count;
+        await jsRuntime.InvokeVoidAsync("alert", "Buffer deleted.");
+    }
+    private async Task CreateBufferFromJs()
+    {
+        for (int i = 0; i < _iterations; i++)
+        {
+            byte[] digits = await jsRuntime.InvokeAsync<byte[]>("CreateBuffer");
+            _bufferHolders.Add(new BufferHolder(digits));
+        }
+        _collectionCount = _bufferHolders.Count;
+        await jsRuntime.InvokeVoidAsync("alert", "Buffer created.");
+    }
+}
