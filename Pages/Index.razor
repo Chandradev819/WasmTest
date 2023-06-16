@@ -8,8 +8,8 @@
 @code {
     private int _collectionCount = 0;
     private List<byte[]> _bufferHolders = new List<byte[]>();
-    private int _bufferLength = 5 * 1024 * 1024;
-    private int _iterations = 10;
+    private readonly int _bufferLength = 5 * 1024 * 1024;
+    private readonly int _iterations = 10;
 
     private async Task CreateBuffer()
     {
